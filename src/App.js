@@ -11,16 +11,37 @@ function App() {
     eventVenue: '',
     eventStartTime: '',
     eventEndTime: '',
-    deliverableDescription: '',
-    deliverableQuantity: '',
-    deliverableMode: '',
-    deliverableDeliveryDate: '',
   });
 
-  const [showDeliverable, setShowDeliverable] = useState(false);
+  const [deliverables, setDeliverables] = useState([
+    {
+      description: '',
+      quantity: '',
+      mode: '',
+      deliveryDate: '',
+    },
+  ]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDeliverableChange = (index, key, value) => {
+    const newDeliverables = [...deliverables];
+    newDeliverables[index][key] = value;
+    setDeliverables(newDeliverables);
+  };
+
+  const addDeliverable = () => {
+    setDeliverables([
+      ...deliverables,
+      {
+        description: '',
+        quantity: '',
+        mode: '',
+        deliveryDate: '',
+      },
+    ]);
   };
 
   const handleSubmit = async (e) => {
@@ -33,8 +54,13 @@ function App() {
       return;
     }
 
+    const data = {
+      ...formData,
+      deliverables,
+    };
+
     try {
-      const response = await axios.post('https://your-api-endpoint', formData);
+      const response = await axios.post('https://your-api-endpoint', data);
       console.log(response);
     } catch (error) {
       console.error(error);
@@ -45,7 +71,7 @@ function App() {
     <div className="app">
       <h1>Event Form</h1>
       <form onSubmit={handleSubmit} className="form">
-      <input
+        <input
           type="text"
           name="clientName"
           placeholder="Client Name"
@@ -116,108 +142,79 @@ function App() {
         </label>
         <br />
         <h3>Deliverables</h3>
+        {deliverables.map((deliverable, index) => (
+          <div key={index}>
+            <input
+              type="text"
+              name="description"
+              placeholder="Description"
+              value={deliverable.description}
+              onChange={(e) =>
+                handleDeliverableChange(index, 'description', e.target.value)
+              }
+              className="input"
+              required
+            />
+            <br />
+            <input
+              type="text"
+              name="quantity"
+              placeholder="Quantity"
+              value={deliverable.quantity}
+              onChange={(e) =>
+                handleDeliverableChange(index, 'quantity', e.target.value)
+              }
+              className="input"
+              required
+            />
+            <br />
+            <select
+              name="mode"
+              value={deliverable.mode}
+              onChange={(e) =>
+                handleDeliverableChange(index, 'mode', e.target.value)
+              }
+              className="input"
+              required
+            >
+              <option value="">Select Mode</option>
+              <option value="Web Link">Web Link</option>
+              <option value="Hard disk (To be provided by Client)">
+                Hard disk (To be provided by Client)
+              </option>
+              <option value="Hard disk (To be bought by RDS for Client)">
+                Hard disk (To be bought by RDS for Client)
+              </option>
+            </select>
+            <br />
+            <input
+              type="date"
+              name="deliveryDate"
+              value={deliverable.deliveryDate}
+              onChange={(e) =>
+                handleDeliverableChange(index, 'deliveryDate', e.target.value)
+              }
+              className="input"
+              required
+            />
+            <br />
+          </div>
+        ))}
+        <button
+          type="button"
+          className="add-deliverable-button"
+          onClick={addDeliverable}
+        >
+          Add Deliverable
+        </button>
         <br />
-        <input
-              type="text"
-              name="deliverableDescription"
-              placeholder="Description"
-              value={formData.deliverableDescription}
-              onChange={handleChange}
-              className="input"
-            />
-            <br />
-            <input
-              type="text"
-              name="deliverableQuantity"
-              placeholder="Quantity"
-              value={formData.deliverableQuantity}
-              onChange={handleChange}
-              className="input"
-            />
-            <br />
-            <select
-              name="deliverableMode"
-              value={formData.deliverableMode}
-              onChange={handleChange}
-              className="input"
-            >
-              <option value="">Select Mode</option>
-              <option value="Web Link">Web Link</option>
-              <option value="Hard disk (To be provided by Client)">
-                Hard disk (To be provided by Client)
-              </option>
-              <option value="Hard disk (To be bought by RDS for Client)">
-                Hard disk (To be bought by RDS for Client)
-              </option>
-            </select>
-            <br />
-            <input
-              type="date"
-              name="deliverableDeliveryDate"
-              value={formData.deliverableDeliveryDate}
-              onChange={handleChange}
-              className="input"
-            />
-            <br />
-        {!showDeliverable && (
-          <button
-            type="button"
-            className="add-deliverable-button"
-            onClick={() => setShowDeliverable(true)}
-          >
-            Add More Deliverables
-          </button>
-        )}
-        {showDeliverable && (
-          <>
-            <input
-              type="text"
-              name="deliverableDescription"
-              placeholder="Description"
-              value={formData.deliverableDescription}
-              onChange={handleChange}
-              className="input"
-            />
-            <br />
-            <input
-              type="text"
-              name="deliverableQuantity"
-              placeholder="Quantity"
-              value={formData.deliverableQuantity}
-              onChange={handleChange}
-              className="input"
-            />
-            <br />
-            <select
-              name="deliverableMode"
-              value={formData.deliverableMode}
-              onChange={handleChange}
-              className="input"
-            >
-              <option value="">Select Mode</option>
-              <option value="Web Link">Web Link</option>
-              <option value="Hard disk (To be provided by Client)">
-                Hard disk (To be provided by Client)
-              </option>
-              <option value="Hard disk (To be bought by RDS for Client)">
-                Hard disk (To be bought by RDS for Client)
-              </option>
-            </select>
-            <br />
-            <input
-              type="date"
-              name="deliverableDeliveryDate"
-              value={formData.deliverableDeliveryDate}
-              onChange={handleChange}
-              className="input"
-            />
-            <br />
-          </>
-        )}
-        <button type="submit" className="submit-button">Submit</button>
+        <button type="submit" className="submit-button">
+          Submit
+        </button>
       </form>
     </div>
   );
 }
 
 export default App;
+
