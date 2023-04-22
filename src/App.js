@@ -1,220 +1,74 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import './App.css';
 
 function App() {
-  const [formData, setFormData] = useState({
-    clientName: '',
-    clientEmail: '',
-    eventName: '',
-    eventDate: '',
-    eventVenue: '',
-    eventStartTime: '',
-    eventEndTime: '',
-  });
+  const [response, setResponse] = useState(null);
 
-  const [deliverables, setDeliverables] = useState([
-    {
-      description: '',
-      quantity: '',
-      mode: '',
-      deliveryDate: '',
-    },
-  ]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleDeliverableChange = (index, key, value) => {
-    const newDeliverables = [...deliverables];
-    newDeliverables[index][key] = value;
-    setDeliverables(newDeliverables);
-  };
-
-  const addDeliverable = () => {
-    setDeliverables([
-      ...deliverables,
-      {
-        description: '',
-        quantity: '',
-        mode: '',
-        deliveryDate: '',
+  const handleSubmit = async () => {
+    const requestData = {
+      clientDetails: {
+        ClientName: 'Jennifer Aniston',
+        ClientEmail: 'jenny@gmail.com',
       },
-    ]);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.clientEmail)) {
-      alert('Please enter a valid email address.');
-      return;
-    }
-
-    const data = {
-      ...formData,
-      deliverables,
+      eventDetails: {
+        EventName: 'Wedding Ceremony',
+        EventDate: '01/01/2024',
+        EventCoverageTime: '6am - 12pm EST(6Hrs)',
+        EventVenue: 'Ashland Temple',
+      },
+      paymentDetails: {
+        TotalAmount: 4000,
+        PerHourExtra: 300,
+      },
+      deliverableDetails: [
+        {
+          Description: 'Edited JPEGs',
+          Quantity: '180',
+          Mode: 'Web Link',
+          DeliveryDate: '06/06/2024',
+        },
+        {
+          Description: 'Highlights Video',
+          Quantity: '10 mins',
+          Mode: 'Hard disk (To be provided by Client)',
+          DeliveryDate: '06/10/2024',
+        },
+        {
+          Description: 'RAW Video',
+          Quantity: 'Full length of the event',
+          Mode: 'Hard disk (To be bought by RDS for Client)',
+          DeliveryDate: '02/01/2024',
+        },
+      ],
     };
 
     try {
-      const response = await axios.post('https://your-api-endpoint', data);
-      console.log(response);
+      const response = await fetch('http://localhost:8080/newcontract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const data = await response.json();
+      setResponse(data);
     } catch (error) {
-      console.error(error);
+      console.error('Error:', error);
     }
   };
 
   return (
-    <div className="app">
-      <h1>Event Form</h1>
-      <form onSubmit={handleSubmit} className="form">
-        <input
-          type="text"
-          name="clientName"
-          placeholder="Client Name"
-          value={formData.clientName}
-          onChange={handleChange}
-          className="input"
-          required
-        />
-        <br />
-        <input
-          type="email"
-          name="clientEmail"
-          placeholder="Client Email"
-          value={formData.clientEmail}
-          onChange={handleChange}
-          className="input"
-          required
-        />
-        <br />
-        <input
-          type="text"
-          name="eventName"
-          placeholder="Event Name"
-          value={formData.eventName}
-          onChange={handleChange}
-          className="input"
-          required
-        />
-        <br />
-        <input
-          type="date"
-          name="eventDate"
-          value={formData.eventDate}
-          onChange={handleChange}
-          className="input"
-          required
-        />
-        <br />
-        <input
-          type="text"
-          name="eventVenue"
-          placeholder="Event Venue"
-          value={formData.eventVenue}
-          onChange={handleChange}
-          className="input"
-          required
-        />
-        <br />
-        <label>
-          Event Coverage Time (24-hour format):
-          <br />
-          <input
-            type="time"
-            name="eventStartTime"
-            value={formData.eventStartTime}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-          <input
-            type="time"
-            name="eventEndTime"
-            value={formData.eventEndTime}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </label>
-        <br />
-        <h3>Deliverables</h3>
-        {deliverables.map((deliverable, index) => (
-          <div key={index}>
-            <input
-              type="text"
-              name="description"
-              placeholder="Description"
-              value={deliverable.description}
-              onChange={(e) =>
-                handleDeliverableChange(index, 'description', e.target.value)
-              }
-              className="input"
-              required
-            />
-            <br />
-            <input
-              type="text"
-              name="quantity"
-              placeholder="Quantity"
-              value={deliverable.quantity}
-              onChange={(e) =>
-                handleDeliverableChange(index, 'quantity', e.target.value)
-              }
-              className="input"
-              required
-            />
-            <br />
-            <select
-              name="mode"
-              value={deliverable.mode}
-              onChange={(e) =>
-                handleDeliverableChange(index, 'mode', e.target.value)
-              }
-              className="input"
-              required
-            >
-              <option value="">Select Mode</option>
-              <option value="Web Link">Web Link</option>
-              <option value="Hard disk (To be provided by Client)">
-                Hard disk (To be provided by Client)
-              </option>
-              <option value="Hard disk (To be bought by RDS for Client)">
-                Hard disk (To be bought by RDS for Client)
-              </option>
-            </select>
-            <br />
-            <input
-              type="date"
-              name="deliveryDate"
-              value={deliverable.deliveryDate}
-              onChange={(e) =>
-                handleDeliverableChange(index, 'deliveryDate', e.target.value)
-              }
-              className="input"
-              required
-            />
-            <br />
-          </div>
-        ))}
-        <button
-          type="button"
-          className="add-deliverable-button"
-          onClick={addDeliverable}
-        >
-          Add Deliverable
-        </button>
-        <br />
-        <button type="submit" className="submit-button">
-          Submit
-        </button>
-      </form>
+    <div className="App"> 
+      <h1>React POST Request Example</h1>
+      <button onClick={handleSubmit}>Send POST Request</button>
+      {response && (
+        <div>
+          <h2>Response:</h2>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 }
 
 export default App;
-
