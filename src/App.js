@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import moment from 'moment';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css'; // Import the CSS file
 
 const formatCoverageTime = (startTime, endTime) => {
@@ -37,7 +40,6 @@ const formatCoverageTime = (startTime, endTime) => {
 
 
 function App() {
-  const [response, setResponse] = useState(null);
 
   // State for form input values
   const [clientName, setClientName] = useState('');
@@ -72,6 +74,30 @@ function App() {
     ]);
   };
 
+  const handleSuccess = (message) => {
+    toast.success(message, {
+      position: toast.POSITION.TOP_CENTER,
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
+  const handleError = (error) => {
+    toast.error(error, {
+      position: toast.POSITION.TOP_CENTER,
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
   const updateDeliverable = (index, field, value) => {
     const updatedDeliverables = [...deliverables];
     updatedDeliverables[index][field] = value;
@@ -100,19 +126,23 @@ function App() {
     };
 
     try {
-      console.log(JSON.stringify(requestData))
-      const response = await fetch('https://reddot-studios-contracts-backend.onrender.com/newcontract', {
-        method: 'POST',
+      console.log(JSON.stringify(requestData));
+      const response = await axios.post('https://reddot-studios-contracts-backend.onrender.com/newcontract', requestData, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestData),
       });
-
-      const data = await response.json();
-      setResponse(data);
+    
+      handleSuccess(response.data.message);
     } catch (error) {
-      console.error('Error:', error);
+      if (error.response) {
+        // The request was made and the server responded with a status code outside the range of 2xx
+        handleError(error.response.data.error);
+      } else {
+        // Something happened in setting up the request that triggered an error
+        handleError(error.message);
+        console.error('Error:', error.message);
+      }
     }
   };
 
@@ -275,12 +305,6 @@ function App() {
         <br />
         <button type="submit">Send POST Request</button>
       </form>
-      {response && (
-        <div>
-          <h2>Response:</h2>
-          <pre>{JSON.stringify(response, null, 2)}</pre>
-        </div>
-      )}
     </div>
   );
 }
