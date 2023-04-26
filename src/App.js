@@ -3,6 +3,7 @@ import moment from 'moment';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ClipLoader } from 'react-spinners';
 import './App.css'; // Import the CSS file
 
 const formatCoverageTime = (startTime, endTime) => {
@@ -40,6 +41,7 @@ const formatCoverageTime = (startTime, endTime) => {
 
 
 function App() {
+  const [isLoading, setIsLoading] = useState(false);
 
   // State for form input values
   const [clientName, setClientName] = useState('');
@@ -126,15 +128,17 @@ function App() {
     };
 
     try {
-      console.log(JSON.stringify(requestData));
+      setIsLoading(true)
       const response = await axios.post('https://reddot-studios-contracts-backend.onrender.com/newcontract', requestData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-    
+      
+      setIsLoading(false)
       handleSuccess(response.data.message);
     } catch (error) {
+      setIsLoading(false)
       if (error.response) {
         // The request was made and the server responded with a status code outside the range of 2xx
         handleError(error.response.data.error);
@@ -148,163 +152,168 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Create a client contract</h1>
-      <form onSubmit={handleSubmit}>
-      <h2>Client Details</h2>
-      <div>
-        <label>
-          Client Name: 
-          <input
-            type="text"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Client Email:
-          <input
-            type="email"
-            value={clientEmail}
-            onChange={(e) => setClientEmail(e.target.value)}
-          />
-        </label>
-        </div>
-        <br />
-        <h2>Event Details</h2>
-        <div>
-        <label>
-          Event Name:
-          <input
-            type="text"
-            value={eventName}
-            onChange={(e) => setEventName(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Event Date:
-          <input
-            type="date"
-            value={eventDate}
-            onChange={(e) => setEventDate(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Event Coverage Start Time:
-          <input
-            type="time"
-            value={eventCoverageStartTime}
-            onChange={(e) => setEventCoverageStartTime(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Event Coverage End Time:
-          <input
-            type="time"
-            value={eventCoverageEndTime}
-            onChange={(e) => setEventCoverageEndTime(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Event Venue:
-          <input
-            type="text"
-            value={eventVenue}
-            onChange={(e) => setEventVenue(e.target.value)}
-          />
-        </label>
-        </div>
-        <br />
-        <h2>Payment Details</h2>
-        <div>
-        <label>
-          Total Amount:
-          <input
-            type="number"
-            value={totalAmount}
-            onChange={(e) => setTotalAmount(e.target.value)}
-          />
-        </label>
-        <br />
-        <label>
-          Per Hour Extra:
-          <input
-            type="number"
-            value={perHourExtra}
-            onChange={(e) => setPerHourExtra(e.target.value)}
-          />
-        </label>
-        </div>
-        <br />
-        <h2>Deliverable Details</h2>
-        {deliverables.map((deliverable, index) => (
-          <div key={index}>
-            <h3>Deliverable {index + 1}</h3>
-            <label>
-              Description:
-              <input
-                type="text"
-                value={deliverable.description}
-                onChange={(e) =>
-                  updateDeliverable(index, 'description', e.target.value)
-                }
-              />
-            </label>
-            <br />
-            <label>
-              Quantity:
-              <input
-                type="text"
-                value={deliverable.quantity}
-                onChange={(e) =>
-                  updateDeliverable(index, 'quantity', e.target.value)
-                }
-              />
-            </label>
-            <br />
-            <br />
-            <label>
-              Mode:
-              <select
-                value={deliverable.mode}
-                onChange={(e) =>
-                  updateDeliverable(index, 'mode', e.target.value)
-                }
-              >
-                <option value="">--Select mode--</option>
-                <option value="Web Link">Web Link</option>
-                <option value="Hard disk (To be provided by Client)">
-                  Hard disk (To be provided by Client)
-                </option>
-                <option value="Hard disk (To be bought by RDS for Client)">
-                  Hard disk (To be bought by RDS for Client)
-                </option>
-              </select>
-            </label>
-            <br />
-            <label>
-              Delivery Date:
-              <input
-                type="date"
-                value={deliverable.deliveryDate}
-                onChange={(e) =>
-                  updateDeliverable(index, 'deliveryDate', e.target.value)
-                }
-              />
-            </label>
-            <br />
-          </div>
-        ))}
-        <button type="button" onClick={addDeliverable}>
-          Add More Deliverables
-        </button>
-        <br />
-        <button type="submit">Send POST Request</button>
-      </form>
+      {isLoading ? (<div className="spinner-container">
+  <ClipLoader color="#00BFFF" loading={isLoading} size={50} />
+</div>): <>
+          <h1>Create a client contract</h1>
+            <form onSubmit={handleSubmit}>
+            <h2>Client Details</h2>
+            <div>
+              <label>
+                Client Name: 
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                />
+              </label>
+              <br />
+              <label>
+                Client Email:
+                <input
+                  type="email"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                />
+              </label>
+              </div>
+              <br />
+              <h2>Event Details</h2>
+              <div>
+              <label>
+                Event Name:
+                <input
+                  type="text"
+                  value={eventName}
+                  onChange={(e) => setEventName(e.target.value)}
+                />
+              </label>
+              <br />
+              <label>
+                Event Date:
+                <input
+                  type="date"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                />
+              </label>
+              <br />
+              <label>
+                Event Coverage Start Time:
+                <input
+                  type="time"
+                  value={eventCoverageStartTime}
+                  onChange={(e) => setEventCoverageStartTime(e.target.value)}
+                />
+              </label>
+              <br />
+              <label>
+                Event Coverage End Time:
+                <input
+                  type="time"
+                  value={eventCoverageEndTime}
+                  onChange={(e) => setEventCoverageEndTime(e.target.value)}
+                />
+              </label>
+              <br />
+              <label>
+                Event Venue:
+                <input
+                  type="text"
+                  value={eventVenue}
+                  onChange={(e) => setEventVenue(e.target.value)}
+                />
+              </label>
+              </div>
+              <br />
+              <h2>Payment Details</h2>
+              <div>
+              <label>
+                Total Amount:
+                <input
+                  type="number"
+                  value={totalAmount}
+                  onChange={(e) => setTotalAmount(e.target.value)}
+                />
+              </label>
+              <br />
+              <label>
+                Per Hour Extra:
+                <input
+                  type="number"
+                  value={perHourExtra}
+                  onChange={(e) => setPerHourExtra(e.target.value)}
+                />
+              </label>
+              </div>
+              <br />
+              <h2>Deliverable Details</h2>
+              {deliverables.map((deliverable, index) => (
+                <div key={index}>
+                  <h3>Deliverable {index + 1}</h3>
+                  <label>
+                    Description:
+                    <input
+                      type="text"
+                      value={deliverable.description}
+                      onChange={(e) =>
+                        updateDeliverable(index, 'description', e.target.value)
+                      }
+                    />
+                  </label>
+                  <br />
+                  <label>
+                    Quantity:
+                    <input
+                      type="text"
+                      value={deliverable.quantity}
+                      onChange={(e) =>
+                        updateDeliverable(index, 'quantity', e.target.value)
+                      }
+                    />
+                  </label>
+                  <br />
+                  <br />
+                  <label>
+                    Mode:
+                    <select
+                      value={deliverable.mode}
+                      onChange={(e) =>
+                        updateDeliverable(index, 'mode', e.target.value)
+                      }
+                    >
+                      <option value="">--Select mode--</option>
+                      <option value="Web Link">Web Link</option>
+                      <option value="Hard disk (To be provided by Client)">
+                        Hard disk (To be provided by Client)
+                      </option>
+                      <option value="Hard disk (To be bought by RDS for Client)">
+                        Hard disk (To be bought by RDS for Client)
+                      </option>
+                    </select>
+                  </label>
+                  <br />
+                  <label>
+                    Delivery Date:
+                    <input
+                      type="date"
+                      value={deliverable.deliveryDate}
+                      onChange={(e) =>
+                        updateDeliverable(index, 'deliveryDate', e.target.value)
+                      }
+                    />
+                  </label>
+                  <br />
+                </div>
+              ))}
+              <button type="button" onClick={addDeliverable}>
+                Add More Deliverables
+              </button>
+              <br />
+              <button type="submit">Send POST Request</button>
+            </form>
+          </>
+           }
     </div>
   );
 }
